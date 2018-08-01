@@ -549,15 +549,19 @@ class RNFetchBlobFS {
         InputStream in = null;
         OutputStream out = null;
 
+        boolean alreadyInvoked = false;
+
         try {
             if(!isPathExists(path)) {
-                callback.invoke("Source file at path`" + path + "` does not exist");
+                if (!alreadyInvoked ) callback.invoke("Source file at path`" + path + "` does not exist");
+                alreadyInvoked = true;
                 return;
             }
             if(!new File(dest).exists()) {
                 boolean result = new File(dest).createNewFile();
                 if (!result) {
-                    callback.invoke("Destination file at '" + dest + "' already exists");
+                    if (!alreadyInvoked) callback.invoke("Destination file at '" + dest + "' already exists");
+                    alreadyInvoked = true;
                     return;
                 }
             }
@@ -571,7 +575,8 @@ class RNFetchBlobFS {
                 out.write(buf, 0, len);
             }
         } catch (Exception err) {
-            callback.invoke(err.getLocalizedMessage());
+            if (!alreadyInvoked) callback.invoke(err.getLocalizedMessage());
+            alreadyInvoked = true;
         } finally {
             try {
                 if (in != null) {
@@ -580,9 +585,11 @@ class RNFetchBlobFS {
                 if (out != null) {
                     out.close();
                 }
-                callback.invoke();
+                if (!alreadyInvoked) callback.invoke();
+                alreadyInvoked = true;
             } catch (Exception e) {
-                callback.invoke(e.getLocalizedMessage());
+                if (!alreadyInvoked) callback.invoke(e.getLocalizedMessage());
+                alreadyInvoked = true;
             }
         }
     }
