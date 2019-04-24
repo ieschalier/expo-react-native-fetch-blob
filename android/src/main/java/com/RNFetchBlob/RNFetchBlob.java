@@ -127,8 +127,13 @@ public class RNFetchBlob extends ReactContextBaseJavaModule {
                 }
 
             } else {
-                Intent intent = new Intent(Intent.ACTION_VIEW)
-                        .setDataAndType(Uri.parse("file://" + path), mime).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                File file = new File(path);
+                Uri fileUri = FileProvider.getUriForFile(getCurrentActivity(),
+                        this.getReactApplicationContext().getPackageName() + ".provider", file);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setDataAndType(fileUri, "application/pdf");
 
                 this.getReactApplicationContext().startActivity(intent);
             }
